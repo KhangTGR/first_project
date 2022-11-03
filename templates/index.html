@@ -1,0 +1,58 @@
+<html>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script>
+
+        var socket = io.connect( 'http://' + document.domain + ':' + location.port )
+        // broadcast a message
+        socket.on( 'connect', function() {
+            socket.emit( 'my event', {
+                data: 'User Connected'
+            } )
+            var form = $( 'form' ).on( 'submit', function( e ) {
+                e.preventDefault()
+                let user_name = $( 'input.username' ).val()
+                let user_input = $( 'input.message' ).val()
+                socket.emit( 'my event', {
+                    user_name : user_name,
+                    message : user_input
+                } )
+                // empty the input field
+                $( 'input.message' ).val( '' ).focus()
+            } )
+        } )
+
+        // capture message
+        socket.on( 'my response', function( msg ) {
+            console.log( msg )
+            if( typeof msg.user_name !== 'undefined' ) {
+                $( 'pre#chatbox' ).remove()
+                
+                n =  new Date();
+                
+                y = n.getFullYear();
+                m = n.getMonth() + 1;
+                d = n.getDate();
+                hour = n.getHours();
+                min = n.getMinutes();
+                sec = n.getSeconds();
+                
+                innerDate = "[" + y + "-" + m + "-" + d + " " + hour + ":" + min + ":" + sec + "] ";
+                
+                $( 'div.message_holder' ).append( '<div>'+ innerDate + msg.user_name + ': ' + msg.message+'</div>' )
+            }
+        } )
+
+        
+    </script>
+
+    <body>
+        <form id="inform" action="" method="POST">
+            User name:<input class="username" name="username" type=text required>
+            message:<input class="message" name="msg" type=text required>
+            <input id="sendBtn" type="submit" value="send">
+        </form>
+        <pre id="chatbox">Loading...</pre>
+        <div class="message_holder"></div>
+    </body>
+</html>
