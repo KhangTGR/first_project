@@ -1,0 +1,81 @@
+<html>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+
+        // PURPOSE: return the room number.
+        function room() {
+            // Link for 'window.location.href' explaination: https://www.w3schools.com/js/js_window_location.asp
+            // window.location.href returns the href (URL) of the current page
+
+            // Link for 'substring' explaination: https://www.w3schools.com/jsref/jsref_substring.asp
+            // simply extract line to get the wanted string
+
+            // Link for 'lastIndexOf' explaination: https://www.w3schools.com/jsref/jsref_lastindexof.asp
+            // - The lastIndexOf() method returns the index (position) of the last occurrence of a specified value in a string.
+            // - The lastIndexOf() method searches the string from the end to the beginning.
+
+            // For example: localhost:5000/245b/bathroom
+            // 'window.location.href.lastIndexOf('/')+1' => 18
+            // 'window.location.href.substring(18)' => 'bathroom'
+            // => room = 'bathroom' 
+            var room = window.location.href.substring(window.location.href.lastIndexOf('/')+1);
+
+            // Checking if the 'room' is NULL or EMPTY
+            // if TRUE => room = 'general'
+            // if FALSE => room = 'bathroom'
+            if (room=='') room = 'general';
+
+            // Finally return the function's value: '/api/chat/bathroom'
+            return "/api/chat/"+room;
+        }
+
+        // PURPOSE: refresh the page to update & append the content | GET
+        function updateChat() {
+            // $.post(<url link>, <content>)
+            // it return/append <content> into <url link>
+            $.get(room(),function(data) {
+                // change text(data) to html(data), PURPOSE: convert to html string
+                // append content onto the screen
+                $("#chatbox").html(data);
+
+                // refresh the page to update
+                window.setTimeout(updateChat,1500);
+            })
+        }
+      
+        // PURPOSE: print the message on the screen | POST
+        function postMess() {
+            // Link for serialize(): https://www.w3schools.com/jquery/ajax_serialize.asp
+            // Example: https://www.w3schools.com/jquery/tryit.asp?filename=tryjquery_ajax_serialize
+            // collect the content from the 'form' and convert into string
+            
+            // $.post(<url link>, <content>)
+            // it return/append <content> into <url link>
+            $.post( room(), $( "#inform" ).serialize() );
+        }
+      
+        // PURPOSE: main function of the page, always working
+        $(document).ready(function() {
+            // replace the 'Loading...' with 'Loading chat...'
+            $("#chatbox").text("Loading chat...");
+
+            // use the postMess func to print on screen after clicking the button
+            $("#sendButton").click(postMess)
+
+            // refresh the page to update
+            window.setTimeout(updateChat,1500);
+        });
+
+    </script>
+    <body>
+        <form id="inform" action="/api/chat" method="POST">
+
+            <!-- add 'required' field, makes the input must have values -->
+            User name:<input name="username" type=text required placeholder="Enter your name">
+            message:<input name="message" type=text required placeholder="Enter the message">
+
+            <input id="sendButton" type="button" value="send">
+        </form>
+        <pre id="chatbox">Loading...</pre>
+    </body>
+</html>
